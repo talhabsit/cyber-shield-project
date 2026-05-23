@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cyber Shield</title>
+
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <!-- LOGO -->
+
+        <div class="nav-logo" id="logoHome">
+
+            <img src="images/logo.png" alt="Logo">
+
+            <h2>Cyber Shield</h2>
+
+        </div>
+
+        <!-- NAV LINKS -->
+
+        <ul class="nav-links" id="navLinks">
+
+            <li id="dashboardMenu">Dashboard</li>
+
+            <li id="historyMenu">History</li>
+
+            <li id="qrMenu">QR Scanner</li>
+
+            <li id="imageMenu">Image Scanner</li>
+
+            <li id="exportMenu">Export</li>
+
+            <li id="clearMenu">Clear</li>
+
+        </ul>
+
+        <!-- MOBILE MENU -->
+
+        <div class="hamburger" id="menuBtn">
+            ☰
+        </div>
+
+    </nav>
+
+    <!-- MAIN CONTENT -->
+
+    <div class="main-content">
+
+        <!-- DASHBOARD SECTION -->
+
+        <section id="dashboardSection">
+
+            <!-- HERO -->
+
+            <div class="hero-section">
+
+                <h1 class="cyber-title">
+                    CYBER SHIELD
+                </h1>
+
+                <p class="cyber-subtitle">
+                    Advanced Cyber Attack Detection System
+                </p>
+
+            </div>
+
+            <!-- CARDS -->
+
+            <div class="stats-container">
+
+                <div class="card">
+
+                    <h3>Total Scans</h3>
+
+                    <p id="totalScans">0</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Dangerous URLs</h3>
+
+                    <p id="dangerCount">0</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Safe URLs</h3>
+
+                    <p id="safeCount">0</p>
+
+                </div>
+
+            </div>
+
+            <!-- INPUT -->
+
+            <div class="input-container">
+
+                <div class="input-wrapper">
+
+                    <input type="text" id="urlInput" placeholder="Enter URL">
+
+                    <button id="pasteBtn">
+                        Paste
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- BUTTONS -->
+
+            <div class="button-group">
+
+                <button id="scanBtn" class="main-btn">
+                    Scan URL
+                </button>
+
+                <button id="pdfBtn" class="main-btn pdf-btn">
+                    Download PDF Report
+                </button>
+
+                <button id="screenshotBtn" class="main-btn screenshot-btn">
+                    Screenshot Report
+                </button>
+
+            </div>
+
+            <!-- RESULT -->
+
+            <div id="result"></div>
+
+            <!-- THREAT METER -->
+
+            <div class="meter-container">
+
+                <div id="threatMeter"></div>
+
+            </div>
+
+            <h3 id="meterText">
+                Threat Level: 0%
+            </h3>
+
+        </section>
+
+        <!-- HISTORY SECTION -->
+
+        <section id="historySection" class="hidden">
+
+            <h2>Scan History</h2>
+
+            <br>
+
+            <input type="text" id="searchInput" placeholder="Search history...">
+
+            <br><br>
+
+            <button id="exportBtn">
+                Export History
+            </button>
+
+            <button id="clearBtn">
+                Clear History
+            </button>
+
+            <div id="history"></div>
+
+        </section>
+
+        <!-- QR SCANNER SECTION -->
+
+        <section id="qrSection" class="hidden">
+
+            <h2>Live QR Scanner</h2>
+
+            <br>
+
+            <video id="qrVideo"></video>
+
+            <br><br>
+
+            <button id="startQrBtn" class="main-btn">
+                Start Scanner
+            </button>
+
+            <br><br>
+
+            <div id="qrResult"></div>
+
+        </section>
+
+        <!-- IMAGE SECTION -->
+
+        <section id="imageSection" class="hidden">
+
+            <h2>Image Scanner</h2>
+
+            <br>
+
+            <input type="file" id="imageInput">
+
+            <br><br>
+
+            <p>
+                Upload suspicious image or screenshot
+            </p>
+
+            <br>
+
+            <div id="imageResult"></div>
+
+        </section>
+
+        <!-- EXPORT SECTION -->
+
+        <section id="exportSection" class="hidden">
+
+            <h2>Export Reports</h2>
+
+            <br><br>
+
+            <button id="downloadPdfBtn" class="main-btn pdf-btn">
+                Download PDF Report
+            </button>
+
+            <br><br>
+
+            <button id="downloadScreenshotBtn" class="main-btn screenshot-btn">
+                Download Screenshot
+            </button>
+
+        </section>
+
+    </div>
+
+    <!-- TERMINAL -->
+
+    <div class="terminal">
+
+        <div id="terminalText"></div>
+
+    </div>
+
+    <!-- SCRIPTS -->
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
