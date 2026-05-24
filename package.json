@@ -1,20 +1,25 @@
 {
-  "name": "cyber-shield",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "express": "^5.2.1",
-    "jsqr": "^1.4.0",
-    "mongoose": "^9.6.2",
-    "mysql2": "^3.22.3",
-    "nodemailer": "^8.0.7"
-  }
+    "name": "cyber-shield",
+    "version": "1.0.0",
+    "description": "Cyber Shield Cybersecurity Scanner",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "keywords": [
+        "cybersecurity",
+        "url-scanner",
+        "express",
+        "mysql"
+    ],
+    "author": "Talha Tariq",
+    "license": "ISC",
+    "type": "commonjs",
+    "dependencies": {
+        "express": "^5.2.1",
+        "jsqr": "^1.4.0",
+        "mongoose": "^9.6.2",
+        "mysql2": "^3.22.3",
+        "nodemailer": "^8.0.7"
+    }
 }

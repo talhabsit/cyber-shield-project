@@ -1,27 +1,69 @@
 const express = require("express");
 const path = require("path");
-
-const db = require("./config/mysql");
+const mysql = require("mysql2");
 
 const app = express();
 
-const PORT = 3000;
+// Railway PORT Fix
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve frontend files
 app.use(express.static(path.join(__dirname, "public")));
 
-// Home route
+// Home Route
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// URL Scan API
+// ============================
+// MYSQL CONNECTION
+// ============================
+
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306
+});
+
+// Connect Database
+db.connect((err) => {
+
+    if (err) {
+
+        console.log("❌ MYSQL CONNECTION ERROR:");
+        console.log(err);
+
+    } else {
+
+        console.log("✅ MySQL Connected");
+
+    }
+
+});
+
+// ============================
+// URL SCAN API
+// ============================
+
 app.post("/scan", (req, res) => {
 
     const { url } = req.body;
+
+    // Check if URL exists
+    if (!url) {
+
+        return res.json({
+            success: false,
+            result: "URL is required"
+        });
+
+    }
 
     let status = "";
 
@@ -53,6 +95,7 @@ app.post("/scan", (req, res) => {
 
     let riskScore = 0;
     let threatLevel = "LOW";
+
     // Check dangerous keywords
     dangerousKeywords.forEach(keyword => {
 
@@ -62,14 +105,14 @@ app.post("/scan", (req, res) => {
 
     });
 
-    // Detect IP address URLs
+    // Detect IP Address URLs
     const ipPattern = /(\d{1,3}\.){3}\d{1,3}/;
 
     if (ipPattern.test(url)) {
         riskScore += 30;
     }
 
-    // Final result
+    // Final Result
     if (riskScore >= 60) {
 
         status = "DANGEROUS";
@@ -87,7 +130,7 @@ app.post("/scan", (req, res) => {
 
     }
 
-    // Save into MySQL
+    // Save Into MySQL
     const sql = `
         INSERT INTO scans (url, result, riskScore, time)
         VALUES (?, ?, ?, ?)
@@ -101,9 +144,10 @@ app.post("/scan", (req, res) => {
     ];
 
     db.query(sql, values, (error, resultData) => {
+
         if (error) {
 
-            console.log("MYSQL ERROR:");
+            console.log("❌ MYSQL INSERT ERROR:");
             console.log(error);
 
             return res.json({
@@ -112,6 +156,7 @@ app.post("/scan", (req, res) => {
             });
 
         }
+
         res.json({
             success: true,
             url: url,
@@ -124,7 +169,10 @@ app.post("/scan", (req, res) => {
 
 });
 
-// Get scan history
+// ============================
+// GET SCAN HISTORY
+// ============================
+
 app.get("/history", (req, res) => {
 
     const sql = "SELECT * FROM scans ORDER BY id DESC";
@@ -132,11 +180,14 @@ app.get("/history", (req, res) => {
     db.query(sql, (error, results) => {
 
         if (error) {
+
+            console.log("❌ HISTORY ERROR:");
             console.log(error);
 
             return res.json({
                 success: false
             });
+
         }
 
         res.json({
@@ -148,7 +199,10 @@ app.get("/history", (req, res) => {
 
 });
 
-// Clear history
+// ============================
+// CLEAR HISTORY
+// ============================
+
 app.delete("/clear-history", (req, res) => {
 
     const sql = "DELETE FROM scans";
@@ -156,11 +210,14 @@ app.delete("/clear-history", (req, res) => {
     db.query(sql, (error, result) => {
 
         if (error) {
+
+            console.log("❌ CLEAR HISTORY ERROR:");
             console.log(error);
 
             return res.json({
                 success: false
             });
+
         }
 
         res.json({
@@ -172,7 +229,12 @@ app.delete("/clear-history", (req, res) => {
 
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// ============================
+// START SERVER
+// ============================
+
+app.listen(PORT, "0.0.0.0", () => {
+
+    console.log(`🚀 Server running on port ${PORT}`);
+
 });
