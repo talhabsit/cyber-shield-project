@@ -20,33 +20,41 @@ app.get("/", (req, res) => {
 });
 
 // ============================
-// MYSQL CONNECTION
+// MYSQL CONNECTION POOL
 // ============================
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
+
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306
+    port: process.env.DB_PORT || 3306,
+
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+
 });
 
-// Connect Database
-db.connect((err) => {
+// Test Connection
+
+db.getConnection((err, connection) => {
 
     if (err) {
 
-        console.log("❌ MYSQL CONNECTION ERROR:");
+        console.log("❌ DATABASE CONNECTION FAILED");
         console.log(err);
 
     } else {
 
-        console.log("✅ MySQL Connected");
+        console.log("✅ DATABASE CONNECTED SUCCESSFULLY");
+
+        connection.release();
 
     }
 
 });
-
 // ============================
 // URL SCAN API
 // ============================
