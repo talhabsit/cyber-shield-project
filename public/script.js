@@ -41,6 +41,8 @@ const qrVideo = document.getElementById("qrVideo");
 const qrResult = document.getElementById("qrResult");
 
 const terminalText = document.getElementById("terminalText");
+let scanHistory =
+    JSON.parse(localStorage.getItem("scanHistory")) || [];
 
 /* =========================
    MOBILE MENU
@@ -104,7 +106,16 @@ if (historyMenu) {
     historyMenu.addEventListener("click", () => {
 
         showSection(historySection);
-
+        scanHistory.push({
+            url: url,
+            result: data.result,
+            riskScore: data.riskScore,
+            time: new Date().toLocaleString()
+        });
+        localStorage.setItem(
+            "scanHistory",
+            JSON.stringify(scanHistory)
+        );
         loadHistory();
 
     });
@@ -243,69 +254,48 @@ Risk Score: ${data.riskScore}
    LOAD HISTORY
 ========================= */
 
-async function loadHistory() {
+function loadHistory() {
 
-    try {
+    historyDiv.innerHTML = "";
 
-        const response = await fetch("/history");
+    let total = 0;
+    let dangerous = 0;
+    let safe = 0;
 
-        const data = await response.json();
+    const searchValue =
+        searchInput.value.toLowerCase();
 
-        historyDiv.innerHTML = "";
+    const filteredHistory =
+        scanHistory.filter(item =>
+            item.url.toLowerCase().includes(searchValue)
+        );
 
-        let total = 0;
-        let dangerous = 0;
-        let safe = 0;
+    filteredHistory.reverse().forEach(item => {
 
-        const searchValue =
-            searchInput.value.toLowerCase();
+        total++;
 
-        const filteredHistory =
-            data.history.filter(item =>
-                item.url.toLowerCase().includes(searchValue)
-            );
+        if (item.result === "DANGEROUS")
+            dangerous++;
 
-        filteredHistory.reverse().forEach(item => {
+        if (item.result === "SAFE")
+            safe++;
 
-            total++;
-
-            if (item.result === "DANGEROUS") {
-                dangerous++;
-            }
-
-            if (item.result === "SAFE") {
-                safe++;
-            }
-
-            historyDiv.innerHTML += `
+        historyDiv.innerHTML += `
 <div class="history-item">
-
 <p><strong>URL:</strong> ${item.url}</p>
-
 <p><strong>Result:</strong> ${item.result}</p>
-
 <p><strong>Risk:</strong> ${item.riskScore}</p>
-
 <p><strong>Time:</strong> ${item.time}</p>
-
 </div>
 `;
 
-        });
+    });
 
-        totalScans.innerHTML = total;
-        dangerCount.innerHTML = dangerous;
-        safeCount.innerHTML = safe;
-
-    } catch (error) {
-
-        console.log(error);
-
-    }
+    totalScans.innerHTML = total;
+    dangerCount.innerHTML = dangerous;
+    safeCount.innerHTML = safe;
 
 }
-
-loadHistory();
 
 /* =========================
    SEARCH HISTORY
@@ -331,9 +321,9 @@ if (clearBtn) {
 
         try {
 
-            await fetch("/clear-history", {
-                method: "DELETE"
-            });
+            scanHistory = [];
+
+            localStorage.removeItem("scanHistory");
 
             loadHistory();
 
