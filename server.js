@@ -1,17 +1,15 @@
 const express = require("express");
 const path = require("path");
-const mysql = require("mysql2");
 
 const app = express();
 
-// Railway PORT Fix
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve frontend files
+// Static Files
 app.use(express.static(path.join(__dirname, "public")));
 
 // Home Route
@@ -20,42 +18,6 @@ app.get("/", (req, res) => {
 });
 
 // ============================
-// MYSQL CONNECTION POOL
-// ============================
-
-const db = mysql.createPool({
-
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306,
-
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-
-});
-
-// Test Connection
-
-db.getConnection((err, connection) => {
-
-    if (err) {
-
-        console.log("❌ DATABASE CONNECTION FAILED");
-        console.log(err);
-
-    } else {
-
-        console.log("✅ DATABASE CONNECTED SUCCESSFULLY");
-
-        connection.release();
-
-    }
-
-});
-// ============================
 // URL SCAN API
 // ============================
 
@@ -63,31 +25,15 @@ app.post("/scan", (req, res) => {
 
     const { url } = req.body;
 
-    // Check if URL exists
     if (!url) {
-
         return res.json({
             success: false,
-            result: "URL is required"
+            result: "URL is required",
+            riskScore: 0,
+            threatLevel: "LOW"
         });
-
     }
 
-    let status = "";
-
-    // URL validation
-    const urlPattern = /^(https?:\/\/)[^\s$.?#].[^\s]*$/;
-
-    if (!urlPattern.test(url)) {
-
-        return res.json({
-            success: false,
-            result: "INVALID URL"
-        });
-
-    }
-
-    // Dangerous keywords
     const dangerousKeywords = [
         "free",
         "login",
@@ -103,106 +49,47 @@ app.post("/scan", (req, res) => {
 
     let riskScore = 0;
     let threatLevel = "LOW";
+    let status = "SAFE";
 
-    // Check dangerous keywords
     dangerousKeywords.forEach(keyword => {
-
         if (url.toLowerCase().includes(keyword)) {
             riskScore += 20;
         }
-
     });
 
-    // Detect IP Address URLs
     const ipPattern = /(\d{1,3}\.){3}\d{1,3}/;
 
     if (ipPattern.test(url)) {
         riskScore += 30;
     }
 
-    // Final Result
     if (riskScore >= 60) {
-
         status = "DANGEROUS";
         threatLevel = "HIGH";
-
     } else if (riskScore >= 20) {
-
         status = "SUSPICIOUS";
         threatLevel = "MEDIUM";
-
-    } else {
-
-        status = "SAFE";
-        threatLevel = "LOW";
-
     }
 
-    // Save Into MySQL
-    const sql = `
-        INSERT INTO scans (url, result, riskScore, time)
-        VALUES (?, ?, ?, ?)
-    `;
-
-    const values = [
+    res.json({
+        success: true,
         url,
-        status,
+        result: status,
         riskScore,
-        new Date().toLocaleString()
-    ];
-
-    db.query(sql, values, (error, resultData) => {
-
-        if (error) {
-
-            console.log("❌ MYSQL INSERT ERROR:");
-            console.log(error);
-
-            return res.json({
-                success: false,
-                result: "Database Error"
-            });
-
-        }
-
-        res.json({
-            success: true,
-            url: url,
-            result: status,
-            riskScore: riskScore,
-            threatLevel: threatLevel
-        });
-
+        threatLevel
     });
 
 });
 
 // ============================
-// GET SCAN HISTORY
+// HISTORY
 // ============================
 
 app.get("/history", (req, res) => {
 
-    const sql = "SELECT * FROM scans ORDER BY id DESC";
-
-    db.query(sql, (error, results) => {
-
-        if (error) {
-
-            console.log("❌ HISTORY ERROR:");
-            console.log(error);
-
-            return res.json({
-                success: false
-            });
-
-        }
-
-        res.json({
-            success: true,
-            history: results
-        });
-
+    res.json({
+        success: true,
+        history: []
     });
 
 });
@@ -213,26 +100,9 @@ app.get("/history", (req, res) => {
 
 app.delete("/clear-history", (req, res) => {
 
-    const sql = "DELETE FROM scans";
-
-    db.query(sql, (error, result) => {
-
-        if (error) {
-
-            console.log("❌ CLEAR HISTORY ERROR:");
-            console.log(error);
-
-            return res.json({
-                success: false
-            });
-
-        }
-
-        res.json({
-            success: true,
-            message: "History Cleared"
-        });
-
+    res.json({
+        success: true,
+        message: "History Cleared"
     });
 
 });
